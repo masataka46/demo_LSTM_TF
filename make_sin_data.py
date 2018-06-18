@@ -23,18 +23,21 @@ def make_sin_data2(data_per_cycle=200, n_cycle=5, train_ratio=0.8):
 
     sin_x = np.sin(theta)
     X = sin_x + 0.1 * (2. * np.random.rand(n_data) - 1.)
-    X /= np.std(X)
-    X = X.astype(np.float32)
-
+    X2 = X / np.std(X)
+    X2 = X2.astype(np.float32)
+    print("np.max(sin_x)", np.max(sin_x))
+    print("np.std(X)", np.std(X))
     sin_x /= np.std(X)
+    print("np.max(sin_x)", np.max(sin_x))
     sin_x = sin_x.astype(np.float32)
 
     n_train = int(n_data * train_ratio)
-    X_train, X_test = X[:n_train], X[n_train:]
+    X_train, X_test = X2[:n_train], X2[n_train:]
 
     sin_x_train, sin_x_test = sin_x[:n_train], sin_x[n_train:]
 
     return X_train, X_test, sin_x_train, sin_x_test
+
 
 if __name__ == '__main__':
     X_train, X_test, sin_x_train, sin_x_test = make_sin_data2()

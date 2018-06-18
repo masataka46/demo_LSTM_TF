@@ -2,6 +2,7 @@ import numpy as np
 import tensorflow as tf
 from make_sin_data import make_sin_data2
 from tensorflow.contrib import rnn
+import utility as util
 
 #global variants
 INPUT_NODE_NUM = 1
@@ -10,6 +11,7 @@ OUT_NODE_NUM = 1
 SEQUENCE_LEN = 50
 EPOCH = 200
 BATCH_SIZE = 50
+PREDICT_LEN = 50
 
 
 #make input data, target data
@@ -122,5 +124,24 @@ for epoch in range(EPOCH):
         print('test loss = ', str(loss_test), ', r2 = ', str(r2_))
 
         writer.add_summary(merged_, epoch)
+
+#after learning, predict 50 sequences
+x_test_list = np.arange(len(X_test) - SEQUENCE_LEN - PREDICT_LEN)
+# x_test_list = np.array[0, 1, 2, ...., 99]
+x_test_batch_init, d_test_batch_init = make_minibatch(x_test_list, X_test, sin_x_test)
+x_test_batch_tmp = x_test_batch_init #spit and concat several times
+print("x_test_batch_init.shape", x_test_batch_init.shape)
+print("x_test_batch_tmp.shape", x_test_batch_tmp.shape)
+
+for i in range(SEQUENCE_LEN):
+    prob_tmp = sess.run(prob, feed_dict={x_: x_test_batch_tmp})
+    _, x_test_batch_left = np.split(x_test_batch_tmp, [1], axis=1)
+    prob_tmp_re = prob_tmp.reshape((prob_tmp.shape[0], prob_tmp.shape[1], 1))
+
+    x_test_batch_tmp = np.concatenate((x_test_batch_left, prob_tmp_re), axis=1)
+x_test_batch_tmp_re = x_test_batch_tmp.reshape((x_test_batch_tmp.shape[0], x_test_batch_tmp.shape[1]))
+print("x_test_batch_tmp_re.shape", x_test_batch_tmp_re.shape)
+util.draw_graph(x_test_batch_tmp_re, sin_x_test)
+
 
 
